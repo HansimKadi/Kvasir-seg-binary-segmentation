@@ -6,7 +6,7 @@
 
 Student ID 30  
 Student ID 25  
-Student ID 4  
+Student ID 4  (Hansim) Resolution experiment
 Student ID 36
 
 Bachelor in Data Science, Kristiania University College, Oslo, Norway  
