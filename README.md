@@ -59,6 +59,8 @@ The dataset includes 1,000 RGB images with corresponding greyscale annotations, 
 
 A predefined split is provided through the official Kvasir-SEG GitHub repository, maintained by the dataset's first author, Debesh Jha. [10] The "Data-split" directory contains two text files (train.txt and val.txt) listing the image names. This predefined split structure facilitates comparison and reproducibility of Kvasir-SEG implementations and experiments. The training file contains 880 names, and the validation file contains 120, resulting in an 88:12 split. The validation set also serves as the testing set during evaluation. The JPG images and their mask counterparts include all 1,000 images, which can be traced by their names, allowing the sets to be split using the text files.
 
+![Fig. 2 — Sample images and masks from the Kvasir-SEG dataset](kvasir_images/fig2_samples.png)
+
 ### B. Transformations
 
 For all tests, images and masks were resized to 320×320 pixels and subjected to moderate geometric and color augmentation, including shifts, scales, rotations, RGB shifts, and brightness/contrast adjustments. All images were then normalized using standard ImageNet channel statistics to match the pretrained encoder used in DeepLabV3+. Each dimension is normalized using averages of 0.485, 0.456, and 0.406 for each dimension, and standard deviations of 0.229, 0.224, and 0.225, respectively.
@@ -186,7 +188,11 @@ Before model selection, a comparative trial was conducted between UNet, UNet++ a
 
 DeepLabV3+ is an encoder-decoder convolutional neural network (CNN) developed by researchers affiliated with Google. The model is intended for semantic image segmentation and builds upon DeepLabV3. DeepLabV3+ improves upon its predecessor by incorporating a decoder module that refines segmentation results along object edges, thereby addressing a key limitation. Additionally, DeepLabV3+ leverages Atrous Spatial Pyramid Pooling (ASPP) to capture rich contextual information. The model utilizes depthwise separable convolutions in the ASPP, which significantly reduces computational cost while maintaining accuracy. DeepLabV3+ has achieved state-of-the-art performance on industry benchmark datasets such as PASCAL VOC and Cityscapes.
 
-![Fig. 2 — DeepLabV3+ encoder-decoder architecture](kvasir_images/fig2_deeplabv3plus_architecture.png)
+![Fig. 3 — DeepLabV3+ encoder-decoder architecture](kvasir_images/fig3_deeplabv3_architecture.png)
+
+![Fig. 4 — PASCAL VOC 2012 benchmark dataset](kvasir_images/fig4_pascal_voc.jpg)
+
+![Fig. 5 — Cityscapes benchmark dataset](kvasir_images/fig5_cityscapes.png)
 
 ---
 
@@ -195,6 +201,8 @@ DeepLabV3+ is an encoder-decoder convolutional neural network (CNN) developed by
 ### A. Image Resolution
 
 Resolution refers to the level of detail in an image, specifically the number of pixels it contains. Higher pixel counts facilitate the identification of finer details, enabling more information to be processed and classified from visual input. [21] Similarly, segmentation models process this information, albeit as numerical tensors. Unlike human perception, which is limited, these models can access every pixel in an image. [23] However, their primary constraint is computational power. Increasing pixel density directly raises the computational resources required to train an image segmentation model. [22] This raises the question of whether the increased computational cost is justified and how the relationship between input size and computational power influences the final prediction. The goal of this experiment is to determine how input resolution affects segmentation accuracy, generalization across scales, and training efficiency on the Kvasir-SEG dataset. An assumption prior to the experiment was that high resolution-optimized models would capture more details like boundaries and small objects while low resolution-optimized models would struggle with small objects but not take as long to train.
+
+![Fig. 6 — Resolution effects on images](kvasir_images/fig6_resolution_effects.png)
 
 To evaluate the influence of image resolution on segmentation performance, a series of experiments was conducted in which the model was trained and validated at various input resolutions. These experiments were designed to reveal how scaling the input from the Kvasir-SEG dataset affects model accuracy, generalization, and computation time. For this experiment, all augmentations were removed to maintain a minimal representation of the data. The only exception was the scaling and normalization of both splits. The use of a plateau learning rate scheduler provided additional insight into when the model reached its limit with the selected learning rate. The experiment fully utilized a random seed which can be observed in the config parameter to support reproducibility. The early stopper was utilized in the first part of the experiment which covered direct model performance. Some of the key metrics monitored were epoch time, total loss, dice loss, precision, and IoU.
 
@@ -321,6 +329,8 @@ Tables IV–VI show results across 3 validation resolutions (128, 512, 768), sum
 </tbody>
 </table>
 
+![Fig. 7 — Model results validated on 128×128](kvasir_images/fig7_results_128x128.png)
+
 **TABLE VI — Validated on 512×512:**
 
 <table>
@@ -336,6 +346,8 @@ Tables IV–VI show results across 3 validation resolutions (128, 512, 768), sum
 </tbody>
 </table>
 
+![Fig. 8 — Model results validated on 512×512](kvasir_images/fig8_results_512x512.png)
+
 **TABLE VII — Validated on 768×768:**
 
 <table>
@@ -350,6 +362,8 @@ Tables IV–VI show results across 3 validation resolutions (128, 512, 768), sum
 <tr><td>64</td><td>0.09</td><td>0.03</td><td>0.07</td><td>0.04</td><td>0.01</td><td>0.03</td></tr>
 </tbody>
 </table>
+
+![Fig. 9 — Model results validated on 768×768](kvasir_images/fig9_results_768x768.png)
 
 Analysis of validation Tables IV through VI revealed several relationships between input resolution and segmentation quality. The model achieved optimal performance when training and validation resolutions were similar, with accuracy declining as the difference between these resolutions increased. This proximity effect was observed at both high and low resolutions. For example, a model trained at 64×64 resolution performed better when validated on 128×128 images than on 512×512 images. Conversely, models trained on 512×512 and 768×768 images could not generalize to 64×64 images, with performance approximating random guessing.
 
@@ -507,9 +521,13 @@ The model remained robust with 50% of the training data (Dice 0.8124, IoU 0.7355
 
 Six augmentation configurations were tested. The applied transformations and their intended effects are summarized in Table XVI. Flips and rotations are clearly visible, whereas ElasticTransform and GridDistortion create subtle local deformations that are harder to see but add useful spatial variability. For visualization, deformation strength was temporarily increased to make these effects visible, while training used conservative parameters to preserve anatomical realism. Color-based augmentations (e.g., brightness, contrast, hue) were deliberately excluded because color in colonoscopy frames carries clinically meaningful cues.
 
+![Fig. 10 — Visual examples of the six augmentation configurations](kvasir_images/fig10_augmentation_examples.png)
+
 A fixed seed (=42) was used for Python, NumPy, and PyTorch (including CUDA), with cuDNN set to deterministic and `num_workers=0` to ensure identical shuffling and batching. No random augmentations were applied, so results are reproducible.
 
 Neural networks do not optimize over a simple bowl-shaped loss as in the convex case. Instead, the loss surface has many bumps and valleys, so an optimizer can get stuck in a "good" but not "best" region, often referred to as a local minimum versus a global minimum. With the higher learning rate (0.01), the momentum-based optimizers (SGD, NAG) could take larger steps and move past small valleys, which is also why they reached the best Dice in Table XVII. With the lower learning rate (0.001), the steps were smaller and the adaptive optimizers (AdaGrad, Adam, AdamW) could refine the solution within one region and match the results in Table XVIII. A similar idea of shaping updates so that training converges faster and more reliably is described in the LearnOpenCV article on YOLO loss design [20].
+
+![Fig. 11 — Convex vs. non-convex optimization landscape](kvasir_images/fig11_convex_nonconvex.png)
 
 **TABLE XVI — Validation performance across augmentation configurations:**
 
@@ -539,6 +557,8 @@ After each epoch, the model was evaluated on the validation split, and the Dice 
 
 #### Learning Rate = 0.01
 
+![Fig. 12 — Validation Dice over training epochs, LR = 0.01. Momentum-based optimizers (SGD, NAG) converge quickly to the highest Dice values; adaptive optimizers plateau lower.](kvasir_images/fig12_optimizer_lr001.png)
+
 At the higher learning rate of 0.01 we observe clear differences among the optimizers. The momentum-based optimizers achieved the highest validation Dice scores (≈ 0.86–0.87) and converged faster, whereas the adaptive optimizers reached lower peaks (≈ 0.73–0.78). SGD and NAG show rapid early improvements and then flatten out, indicating fast convergence to a high-performing plateau. All optimizers eventually stabilized by the end of training at this learning rate, and no serious oscillations were observed in their validation Dice curves.
 
 As summarized in Table XVII below, Nesterov Accelerated Gradient (NAG) obtained the highest Dice (0.868) at LR = 0.01, closely followed by SGD (0.859). These two optimizers had almost no gap between their peak Dice and their mean Dice over the last epochs, which reflects stable performance once converged. Among the adaptive optimizers, AdaGrad achieved the best Dice (0.776), but it peaked mid-training (epoch 19) and then declined slightly to 0.766 by the final epoch. The other adaptive methods (Adam, AdamW, RMSProp) improved more gradually and peaked near the last epochs, but they never caught up to SGD or NAG at this higher learning rate. At higher learning rate, the adaptive optimizers likely shrink their step sizes too quickly and follow noisy, parameter-wise updates, so they settle in sharper, worse minima, while SGD and NAG keep more consistent large steps and reach wider valleys that generalize better on Kvasir-SEG data.
@@ -559,7 +579,13 @@ As summarized in Table XVII below, Nesterov Accelerated Gradient (NAG) obtained 
 </tbody>
 </table>
 
+![Fig. 14 — Representative validation predictions: DeepLabV3+ with NAG at LR 10⁻² (exp4_NAG_final.pth)](kvasir_images/fig14_nag_predictions.png)
+
+![Fig. 15 — Representative validation predictions: DeepLabV3+ with SGD at LR 10⁻² (exp4_SGD_final.pth)](kvasir_images/fig15_sgd_predictions.png)
+
 #### Learning Rate = 0.001
+
+![Fig. 13 — Validation Dice over training epochs, LR = 0.001. Adaptive optimizers now benefit from the smaller step size and achieve higher final Dice than momentum-based methods.](kvasir_images/fig13_optimizer_lr0001.png)
 
 Lowering the learning rate to 0.001 had a different impact on optimizer performance, especially benefiting the adaptive optimizers. The adaptive optimizers achieved higher final Dice scores at the lower learning rate than they did at 0.01. Their learning curves are more gradual but steadily improving. In contrast, the momentum-based optimizers converged more slowly under LR = 0.001 and reached lower peak Dice values compared to their high-LR results.
 
@@ -580,6 +606,10 @@ The performance ranking at LR = 0.001 therefore shifted in favor of the adaptive
 <tr><td>SGD</td><td>0.745</td><td>0.789</td><td>37</td><td>0.787</td></tr>
 </tbody>
 </table>
+
+![Fig. 16 — Representative validation predictions: DeepLabV3+ with AdaGrad at LR 10⁻³ (exp4_AdaGrad_LR(0.001)_final.pth)](kvasir_images/fig16_adagrad_predictions.png)
+
+![Fig. 17 — Representative validation predictions: DeepLabV3+ with AdamW at LR 10⁻³ (exp4_AdamW_LR(0.001)_final.pth)](kvasir_images/fig17_adamw_predictions.png)
 
 #### 3) Summary of Learning-Rate Findings
 
@@ -682,3 +712,4 @@ Optimization behaviour was tightly coupled to learning rate. Momentum-based opti
 [23] "Introduction to PyTorch Tensors," *PyTorch Tutorials*, Updated Sep. 22 2025. https://docs.pytorch.org/tutorials/beginner/introyt/tensors_deeper_tutorial.html
 
 [24] "High-resolution imaging advances for deep learning systems," *Nature Communications*, vol. XX, 2025. https://www.nature.com/articles/s41467-025-64679-2
+
