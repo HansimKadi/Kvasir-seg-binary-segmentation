@@ -55,6 +55,8 @@ Early detection of disease is critical, as prompt diagnosis enables timely inter
 
 The dataset includes 1,000 RGB images with corresponding greyscale annotations, varying in size and pixel dimensions. [10] Although Simula has not published detailed documentation on polyp representation as of this report, it is reasonable to assume that the dataset should contain a broad range of polyp variations in both training and testing images. We also monitored this aspect during model evaluation. The data distribution provides insight into the model's exposure to the polyp variations and may indicate whether the current split is appropriate or if repartitioning is necessary. Maintaining balance is essential to ensure that the model learns about both common and subtle variations without developing a bias towards more frequently occurring or apparent variations. The objective is to achieve accurate predictions across all possible variants, especially those resembling early or precancerous lesions.
 
+![Fig. 1 — Colon polyp size classification (Diminutive, Small, Large)](kvasir_images/fig1_polyp_sizes.jpg)
+
 A predefined split is provided through the official Kvasir-SEG GitHub repository, maintained by the dataset's first author, Debesh Jha. [10] The "Data-split" directory contains two text files (train.txt and val.txt) listing the image names. This predefined split structure facilitates comparison and reproducibility of Kvasir-SEG implementations and experiments. The training file contains 880 names, and the validation file contains 120, resulting in an 88:12 split. The validation set also serves as the testing set during evaluation. The JPG images and their mask counterparts include all 1,000 images, which can be traced by their names, allowing the sets to be split using the text files.
 
 ### B. Transformations
@@ -183,6 +185,8 @@ Before model selection, a comparative trial was conducted between UNet, UNet++ a
 </table>
 
 DeepLabV3+ is an encoder-decoder convolutional neural network (CNN) developed by researchers affiliated with Google. The model is intended for semantic image segmentation and builds upon DeepLabV3. DeepLabV3+ improves upon its predecessor by incorporating a decoder module that refines segmentation results along object edges, thereby addressing a key limitation. Additionally, DeepLabV3+ leverages Atrous Spatial Pyramid Pooling (ASPP) to capture rich contextual information. The model utilizes depthwise separable convolutions in the ASPP, which significantly reduces computational cost while maintaining accuracy. DeepLabV3+ has achieved state-of-the-art performance on industry benchmark datasets such as PASCAL VOC and Cityscapes.
+
+![Fig. 2 — DeepLabV3+ encoder-decoder architecture](kvasir_images/fig2_deeplabv3plus_architecture.png)
 
 ---
 
