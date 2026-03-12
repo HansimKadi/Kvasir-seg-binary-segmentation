@@ -635,16 +635,6 @@ Optimization behaviour was tightly coupled to learning rate. Momentum-based opti
 
 ---
 
-## VI. Individual Contributions
-
-**Student ID 30** — Responsible for the *data size experiment*, developing the main code structure, as well as performing code cleaning, commenting, and final refinements on the main code template.
-
-**Student ID 25** — Responsible for the *data augmentation experiments*, development of the main code pipeline, and overall code cleaning and optimization.
-
-**Student ID 4** — Jointly responsible for *core code development*, code cleaning, commenting, and maintaining the main project structure. Contributed extensively to the *methodology section*, documentation, and final report preparation in Overleaf. Specifically led the *resolution experiments*, evaluating how image size impacted segmentation accuracy, and helped with integration of visual figures and tables in the final paper.
-
-**Student ID 36** — Jointly responsible for *core code development*, code cleaning, commenting, and maintaining the main project structure. Contributed extensively to the *methodology section*, documentation, and final report preparation in Overleaf. Specifically led the *optimizer experiments*, performing training runs, comparative analysis, and interpretation of results. Also assisted in result visualization, proofreading, and ensuring consistency across sections.
-
 **TABLE XIX — Best-performing optimizer–learning-rate combinations:**
 
 <table>
